@@ -988,8 +988,8 @@ class ShortcutHandler:
                     shortcuts_data = VDFHandler.load(shortcuts_vdf_path, binary=True)
                     if shortcuts_data and 'shortcuts' in shortcuts_data:
                         for idx, shortcut in shortcuts_data['shortcuts'].items():
-                            app_name = shortcut.get('AppName', '').strip()
-                            exe = shortcut.get('Exe', '').strip('"').strip()
+                            app_name = shortcut.get('AppName', shortcut.get('appname', '')).strip()
+                            exe = shortcut.get('Exe', shortcut.get('exe', '')).strip('"').strip()
                             vdf_shortcuts.append((app_name, exe, idx))
                 except Exception as e:
                     self.logger.error(f"Error parsing shortcuts.vdf for exe path matching: {e}")
@@ -1054,9 +1054,9 @@ class ShortcutHandler:
                     self.logger.warning(f"Skipping invalid shortcut entry (not a dict) at index {shortcut_id} in {shortcuts_file}")
                     continue 
                     
-                app_name = shortcut.get('AppName')
-                exe_path = shortcut.get('Exe', '').strip('"')
-                start_dir = shortcut.get('StartDir', '').strip('"')
+                app_name = shortcut.get('AppName', shortcut.get('appname'))
+                exe_path = shortcut.get('Exe', shortcut.get('exe')).strip('"')
+                start_dir = shortcut.get('StartDir', shortcut.get('startdir', '')).strip('"')
                 
                 # Check if the base name of the exe_path matches the target
                 if app_name and start_dir and os.path.basename(exe_path) == executable_name:
@@ -1180,8 +1180,8 @@ class ShortcutHandler:
                     self.logger.warning(f"Skipping invalid shortcut entry at index {index} in {vdf_path}")
                     continue
 
-                exe_path = shortcut_details.get('Exe', '').strip('"') # Get Exe path, remove quotes
-                app_name = shortcut_details.get('AppName', 'Unknown Shortcut')
+                exe_path = shortcut_details.get('Exe', shortcut_details.get('exe', '')).strip('"') # Get Exe path, remove quotes
+                app_name = shortcut_details.get('AppName', shortcut.get('appname', 'Unknown Shortcut'))
 
                 # Check if the executable_name is present in the Exe path
                 if executable_name in os.path.basename(exe_path):
@@ -1257,8 +1257,8 @@ class ShortcutHandler:
         exe_norm = _normalize_path(exe_path)
         target_index = None
         for index, shortcut_data in data.get('shortcuts', {}).items():
-            shortcut_name = (shortcut_data.get('AppName', '') or '').strip()
-            shortcut_exe_raw = shortcut_data.get('Exe', '')
+            shortcut_name = (shortcut_data.get('AppName', shortcut_data.get('appname', '')) or '').strip()
+            shortcut_exe_raw = shortcut_data.get('Exe', shortcut_data.get('exe', ''))
             shortcut_exe_norm = _normalize_path(shortcut_exe_raw)
             if shortcut_name == app_name and shortcut_exe_norm == exe_norm:
                 target_index = index
@@ -1268,8 +1268,8 @@ class ShortcutHandler:
             self.logger.error(f"Could not find shortcut with AppName '{app_name}' and Exe '{exe_path}' in shortcuts.vdf.")
             # Log all AppNames and Exe values for debugging
             for index, shortcut_data in data.get('shortcuts', {}).items():
-                shortcut_name = shortcut_data.get('AppName', '')
-                shortcut_exe = shortcut_data.get('Exe', '')
+                shortcut_name = shortcut_data.get('AppName', shortcut_data.get('appname', ''))
+                shortcut_exe = shortcut_data.get('Exe', shortcut_data.get('exe', ''))
                 self.logger.error(f"Found shortcut: AppName='{shortcut_name}', Exe='{shortcut_exe}' -> norm='{_normalize_path(shortcut_exe)}'")
             return False
 
